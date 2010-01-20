@@ -3,8 +3,8 @@ scopt
 
 scopt is a little command line options parsing library.
 
-Its based on the code from Aaron Harnly mentioned [http://old.nabble.com/-scala--CLI-library--ts19391923.html#a19391923](in this thread)
-which is available [http://gist.github.com/246481](as a gist) or [http://harnly.net/tmp/OptionsParser.scala](here).
+Its based on the code from Aaron Harnly mentioned [in this thread](http://old.nabble.com/-scala--CLI-library--ts19391923.html#a19391923)
+which is available [as a gist](http://gist.github.com/246481) or [here](http://harnly.net/tmp/OptionsParser.scala).
 
 
 Usage
@@ -29,6 +29,6 @@ Create an *OptionParser* and customise it with the options you need, passing in 
 Building
 --------
 
-You should be able to use either [http://maven.apache.org](maven) or [http://code.google.com/p/simple-build-tool/](sbt) to build scopt.
+You should be able to use either [maven](http://maven.apache.org) or [sbt](http://code.google.com/p/simple-build-tool/) to build scopt.
 
   
