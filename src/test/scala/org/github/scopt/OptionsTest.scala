@@ -18,9 +18,9 @@ class OptionsTest extends FunSuite {
   var config: Config = _
 
   val parser = new OptionParser {
-    onInt("f", "foo", "foo is an integer property", {v: Int => config.foo = v})
-    on("b", "bar", "bar is a string property", {v: String => config.bar = v})
-    onBoolean("x", "xyz", "xyz is a boolean property", {v: Boolean => config.xyz = v})
+    intOpt("f", "foo", "foo is an integer property", {v: Int => config.foo = v})
+    opt("b", "bar", "bar is a string property", {v: String => config.bar = v})
+    booleanOpt("x", "xyz", "xyz is a boolean property", {v: Boolean => config.xyz = v})
     arg("whatnot", "some argument", {v: String => config.whatnot = v})
   }
 

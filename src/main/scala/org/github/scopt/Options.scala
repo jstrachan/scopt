@@ -99,30 +99,33 @@ case class OptionParser(warnOnUnknownArgument: Boolean) {
     }
   }
 
-  def on(shortopt: String, longopt: String, description: String, action: String => Unit) =
+  // setup options (which require -char or --string to invoke
+  def opt(shortopt: String, longopt: String, description: String, action: String => Unit) =
     add(new ArgOptionDefinition(shortopt, longopt, description, action))
 
-  def on(shortopt: String, longopt: String, description: String, action: => Unit) =
+  def opt(shortopt: String, longopt: String, description: String, action: => Unit) =
     add(new FlagOptionDefinition(shortopt, longopt, description, action))
 
-  def arg(name: String, description: String, action: String => Unit) =
-    add(new Argument(name, description, action))
+  // we have to give these typed options separate names, because of &^@$! type erasure
+  def intOpt(shortopt: String, longopt: String, description: String, action: Int => Unit) =
+    add(new IntArgOptionDefinition(shortopt, longopt, description, action))
 
-  def separator(description: String) =
-    add(new SeparatorDefinition(description))
+  def doubleOpt(shortopt: String, longopt: String, description: String, action: Double => Unit) =
+    add(new DoubleArgOptionDefinition(shortopt, longopt, description, action))
+
+  def booleanOpt(shortopt: String, longopt: String, description: String, action: Boolean => Unit) =
+    add(new BooleanArgOptionDefinition(shortopt, longopt, description, action))
 
   def help(shortopt: String, longopt: String, description: String = "show this help message") =
     add(new FlagOptionDefinition(shortopt, longopt, description, {this.showUsage; exit}))
 
-  // we have to give these typed options separate names, because of &^@$! type erasure
-  def onInt(shortopt: String, longopt: String, description: String, action: Int => Unit) =
-    add(new IntArgOptionDefinition(shortopt, longopt, description, action))
+  def separator(description: String) =
+    add(new SeparatorDefinition(description))
 
-  def onDouble(shortopt: String, longopt: String, description: String, action: Double => Unit) =
-    add(new DoubleArgOptionDefinition(shortopt, longopt, description, action))
+  // regular arguments without the - or -- which have a name purely for help
+  def arg(name: String, description: String, action: String => Unit) =
+    add(new Argument(name, description, action))
 
-  def onBoolean(shortopt: String, longopt: String, description: String, action: Boolean => Unit) =
-    add(new BooleanArgOptionDefinition(shortopt, longopt, description, action))
 
   // -------- Getting usage information ---------------
   def descriptions: Seq[String] = options.map(opt => opt match {

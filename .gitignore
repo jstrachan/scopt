@@ -1,2 +1,4 @@
 target
 project/boot
+lib_managed
+*.i??
