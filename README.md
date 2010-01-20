@@ -3,7 +3,9 @@ scopt
 
 scopt is a little command line options parsing library.
 
-Its based on the code from Aaron Harnly mentioned [in this thread](http://old.nabble.com/-scala--CLI-library--ts19391923.html#a19391923)
+Its based on the code from Tim Perrett whic his based on Aaron Harnly's code
+mentioned [in this thread](http://old.nabble.com/-scala--CLI-library--ts19391923.html#a19391923) and
+[this thread](http://old.nabble.com/Parsing-command-lines-argument-in-a-%22scalaesque%22-way-tp26592006p26595257.html)
 which is available [as a gist](http://gist.github.com/246481) or [here](http://harnly.net/tmp/OptionsParser.scala).
 
 
