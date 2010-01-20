@@ -31,4 +31,12 @@ Building
 
 You should be able to use either [maven](http://maven.apache.org) or [sbt](http://code.google.com/p/simple-build-tool/) to build scopt.
 
+
+Changes
+-------
+
+* added maven and sbt builds
+* added ScalaTest test cases
+* added arguments which then are displayed in help
+* minor refactoring of names; opt and arg for options and args
   

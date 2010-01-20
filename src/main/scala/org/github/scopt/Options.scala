@@ -83,7 +83,7 @@ class FlagOptionDefinition(
 /**
  * OptionParser is instantiated within your object,
  * set up by an (ordered) sequence of invocations of 
- * the various builder methods
+ * the various builder methods such as #opt or #arg
  */
 case class OptionParser(warnOnUnknownArgument: Boolean) {
   def this() = this (true)
