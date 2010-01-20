@@ -32,6 +32,11 @@ Building
 You should be able to use either [maven](http://maven.apache.org) or [sbt](http://code.google.com/p/simple-build-tool/) to build scopt.
 
 
+License
+-------
+
+Do whatever you like with it :)
+
 Changes
 -------
 
