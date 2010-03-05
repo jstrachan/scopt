@@ -14,11 +14,11 @@ Usage
 
 Create an *OptionParser* and customise it with the options you need, passing in functions to process each option or argument.
 
-    val parser = new OptionParser {
+    val parser = new OptionParser("scopt") {
       intOpt("f", "foo", "foo is an integer property", {v: Int => config.foo = v})
-      opt("b", "bar", "bar is a string property", {v: String => config.bar = v})
+      opt("o", "output", "<file>", "output is a string property", {v: String => config.bar = v})
       booleanOpt("x", "xyz", "xyz is a boolean property", {v: Boolean => config.xyz = v})
-      arg("whatnot", "some argument", {v: String => config.whatnot = v})
+      arg("<filename>", "some argument", {v: String => config.whatnot = v})
     }
     if (parser.parse(args)) {
        // do stuff
@@ -27,6 +27,18 @@ Create an *OptionParser* and customise it with the options you need, passing in 
       // arguments are bad, usage message will have been displayed
     }
 
+The above generates the following usage text:
+
+    Usage: scopt [options] <filename>
+    
+      -f <value> | --foo <value>
+    	      foo is an integer property
+      -o <file> | --output <file>
+          	output is a string property
+      -x <value> | --xyz <value>
+    	      xyz is a boolean property
+      <filename>
+    	      some argument
 
 Building
 --------

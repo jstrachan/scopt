@@ -17,18 +17,18 @@ case class Config(var foo: Int = -1, var bar: String = null, var xyz: Boolean = 
 class OptionsTest extends FunSuite {
   var config: Config = _
 
-  val parser = new OptionParser {
+  val parser = new OptionParser("scopt") {
     intOpt("f", "foo", "foo is an integer property", {v: Int => config.foo = v})
-    opt("b", "bar", "bar is a string property", {v: String => config.bar = v})
+    opt("o", "output", "<file>", "output is a string property", {v: String => config.bar = v})
     booleanOpt("x", "xyz", "xyz is a boolean property", {v: Boolean => config.xyz = v})
-    arg("whatnot", "some argument", {v: String => config.whatnot = v})
+    arg("<file>", "some argument", {v: String => config.whatnot = v})
   }
 
   test("valid arguments are parsed correctly") {
     validArguments(Config(whatnot = "blah"), "blah")
     validArguments(Config(foo = 35, whatnot = "abc"), "-f", "35", "abc")
-    validArguments(Config(foo = 22, bar = "beer", whatnot = "drink"), "-b", "beer", "-f", "22", "drink")
-    validArguments(Config(foo = 22, bar = "beer", whatnot = "drink"), "-f", "22", "--bar", "beer", "drink")
+    validArguments(Config(foo = 22, bar = "beer", whatnot = "drink"), "-o", "beer", "-f", "22", "drink")
+    validArguments(Config(foo = 22, bar = "beer", whatnot = "drink"), "-f", "22", "--output", "beer", "drink")
   }
 
   test("invalid arguments fail") {
