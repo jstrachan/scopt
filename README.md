@@ -18,6 +18,8 @@ Create an *OptionParser* and customise it with the options you need, passing in 
       intOpt("f", "foo", "foo is an integer property", {v: Int => config.foo = v})
       opt("o", "output", "<file>", "output is a string property", {v: String => config.bar = v})
       booleanOpt("x", "xyz", "xyz is a boolean property", {v: Boolean => config.xyz = v})
+      keyValueOpt("l", "lib", "<libname>", "<filename>", "load library <libname>",
+        {(key: String, value: String) => { config.libname = key; config.libfile = value } })
       arg("<filename>", "some argument", {v: String => config.whatnot = v})
     }
     if (parser.parse(args)) {
@@ -37,6 +39,8 @@ The above generates the following usage text:
           	output is a string property
       -x <value> | --xyz <value>
     	      xyz is a boolean property
+      -l:<libname>=<filename> | --lib:<libname>=<filename>
+          	load library <libname>
       <filename>
     	      some argument
 
