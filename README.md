@@ -58,6 +58,9 @@ Do whatever you like with it :)
 Changes
 -------
 
+* added -x:key=value option 
+* updated usage text style 
+* updated sbt build to build against 2.8.0.Beta1
 * added maven and sbt builds
 * added ScalaTest test cases
 * added arguments which then are displayed in help
