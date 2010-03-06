@@ -15,7 +15,9 @@ case class Config(var foo: Int = -1,
   var bar: String = null,
   var xyz: Boolean = false,
   var libname: String = null,
-  var libfile: String = null, 
+  var libfile: String = null,
+  var maxlibname: String = null,
+  var maxcount: Int = -1,
   var whatnot: String = null)
 
 @RunWith(classOf[JUnitRunner])
@@ -28,6 +30,8 @@ class OptionsTest extends FunSuite {
     booleanOpt("x", "xyz", "xyz is a boolean property", {v: Boolean => config.xyz = v})
     keyValueOpt("l", "lib", "<libname>", "<filename>", "load library <libname>",
       {(key: String, value: String) => { config.libname = key; config.libfile = value } })
+    keyIntValueOpt("m", "max", "<libname>", "<max>", "maximum count for <libname>",
+      {(key: String, value: Int) => { config.maxlibname = key; config.maxcount = value } })
     arg("<file>", "some argument", {v: String => config.whatnot = v})
   }
 
@@ -37,6 +41,7 @@ class OptionsTest extends FunSuite {
     validArguments(Config(foo = 22, bar = "beer", whatnot = "drink"), "-o", "beer", "-f", "22", "drink")
     validArguments(Config(foo = 22, bar = "beer", whatnot = "drink"), "-f", "22", "--output", "beer", "drink")
     validArguments(Config(libname = "key", libfile = "value", whatnot = "drink"), "--lib:key=value", "drink")
+    validArguments(Config(maxlibname = "key", maxcount = 5, whatnot = "drink"), "-m:key=5", "drink")
   }
 
   test("invalid arguments fail") {

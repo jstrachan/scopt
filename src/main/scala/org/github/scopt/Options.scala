@@ -93,11 +93,67 @@ class KeyValueArgOptionDefinition(
         ) extends OptionDefinition(true, shortopt, longopt, keyName, valueName, 
           description, { a: String =>
   a.indexOf('=') match {
-    case -1     => action(a, "")
+    case -1     => throw new IllegalArgumentException("Expected a key=value pair")
     case n: Int => action(a.dropRight(a.length - n), a.drop(n + 1))
   }},
   false, true)
 
+class KeyIntValueArgOptionDefinition(
+        shortopt: String,
+        longopt: String,
+        keyName: String,
+        valueName: String,
+        description: String,
+        action: (String, Int) => Unit
+        ) extends OptionDefinition(true, shortopt, longopt, keyName, valueName, 
+          description, { a: String =>
+  a.indexOf('=') match {
+    case -1     => throw new IllegalArgumentException("Expected a key=value pair")
+    case n: Int => action(a.dropRight(a.length - n), a.drop(n + 1).toInt)
+  }},
+  false, true)
+
+class KeyDoubleValueArgOptionDefinition(
+        shortopt: String,
+        longopt: String,
+        keyName: String,
+        valueName: String,
+        description: String,
+        action: (String, Double) => Unit
+        ) extends OptionDefinition(true, shortopt, longopt, keyName, valueName, 
+          description, { a: String =>
+  a.indexOf('=') match {
+    case -1     => throw new IllegalArgumentException("Expected a key=value pair")
+    case n: Int => action(a.dropRight(a.length - n), a.drop(n + 1).toDouble)
+  }},
+  false, true)
+
+class KeyBooleanValueArgOptionDefinition(
+        shortopt: String,
+        longopt: String,
+        keyName: String,
+        valueName: String,
+        description: String,
+        action: (String, Boolean) => Unit
+        ) extends OptionDefinition(true, shortopt, longopt, null, valueName, 
+          description, { a: String =>
+    if (!a.contains("="))
+      throw new IllegalArgumentException("Expected a key=value pair")
+    
+    val key = a.dropRight(a.length - a.indexOf('='))
+    val boolValue = a.drop(a.indexOf('=') + 1).toLowerCase match {
+      case "true" => true
+      case "false" => false
+      case "yes" => true
+      case "no" => false
+      case "1" => true
+      case "0" => false
+      case _ =>
+        throw new IllegalArgumentException("Expected a string I can interpret as a boolean")
+    }
+    action(key, boolValue)},
+    false, true)
+      
 class FlagOptionDefinition(
         shortopt: String,
         longopt: String,
@@ -176,7 +232,28 @@ case class OptionParser(
   def keyValueOpt(shortopt: String, longopt: String, keyName: String, valueName: String,
       description: String, action: (String, String) => Unit) =
     add(new KeyValueArgOptionDefinition(shortopt, longopt, keyName, valueName, description, action))
-       
+
+  def keyIntValueOpt(shortopt: String, longopt: String, description: String, action: (String, Int) => Unit) =
+    add(new KeyIntValueArgOptionDefinition(shortopt, longopt, defaultKeyName, defaultValueName, description, action))
+
+  def keyIntValueOpt(shortopt: String, longopt: String, keyName: String, valueName: String,
+      description: String, action: (String, Int) => Unit) =
+    add(new KeyIntValueArgOptionDefinition(shortopt, longopt, keyName, valueName, description, action))
+
+  def keyDoubleValueOpt(shortopt: String, longopt: String, description: String, action: (String, Double) => Unit) =
+    add(new KeyDoubleValueArgOptionDefinition(shortopt, longopt, defaultKeyName, defaultValueName, description, action))
+
+  def keyDoubleValueOpt(shortopt: String, longopt: String, keyName: String, valueName: String,
+      description: String, action: (String, Double) => Unit) =
+    add(new KeyDoubleValueArgOptionDefinition(shortopt, longopt, keyName, valueName, description, action))
+    
+  def keyBooleanValueOpt(shortopt: String, longopt: String, description: String, action: (String, Boolean) => Unit) =
+    add(new KeyBooleanValueArgOptionDefinition(shortopt, longopt, defaultKeyName, defaultValueName, description, action))
+
+  def keyBooleanValueOpt(shortopt: String, longopt: String, keyName: String, valueName: String,
+      description: String, action: (String, Boolean) => Unit) =
+    add(new KeyBooleanValueArgOptionDefinition(shortopt, longopt, keyName, valueName, description, action))
+    
   def help(shortopt: String, longopt: String, description: String = "show this help message") =
     add(new FlagOptionDefinition(shortopt, longopt, description, {this.showUsage; exit}))
 
