@@ -11,7 +11,12 @@ import org.scalatest.FunSuite
  * @version $Revision : 1.1 $
  */
 
-case class Config(var foo: Int = -1, var bar: String = null, var xyz: Boolean = false, var whatnot: String = null)
+case class Config(var foo: Int = -1,
+  var bar: String = null,
+  var xyz: Boolean = false,
+  var libname: String = null,
+  var libfile: String = null, 
+  var whatnot: String = null)
 
 @RunWith(classOf[JUnitRunner])
 class OptionsTest extends FunSuite {
@@ -21,6 +26,8 @@ class OptionsTest extends FunSuite {
     intOpt("f", "foo", "foo is an integer property", {v: Int => config.foo = v})
     opt("o", "output", "<file>", "output is a string property", {v: String => config.bar = v})
     booleanOpt("x", "xyz", "xyz is a boolean property", {v: Boolean => config.xyz = v})
+    keyValueOpt("l", "lib", "<libname>", "<filename>", "load library <libname>",
+      {(key: String, value: String) => { config.libname = key; config.libfile = value } })
     arg("<file>", "some argument", {v: String => config.whatnot = v})
   }
 
@@ -29,6 +36,7 @@ class OptionsTest extends FunSuite {
     validArguments(Config(foo = 35, whatnot = "abc"), "-f", "35", "abc")
     validArguments(Config(foo = 22, bar = "beer", whatnot = "drink"), "-o", "beer", "-f", "22", "drink")
     validArguments(Config(foo = 22, bar = "beer", whatnot = "drink"), "-f", "22", "--output", "beer", "drink")
+    validArguments(Config(libname = "key", libfile = "value", whatnot = "drink"), "--lib:key=value", "drink")
   }
 
   test("invalid arguments fail") {

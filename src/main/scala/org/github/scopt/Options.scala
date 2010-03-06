@@ -8,28 +8,29 @@ import collection.mutable.ListBuffer
 // usually mutating a var.
 case class OptionDefinition(
         canBeInvoked: Boolean,
-        shortopt: String, 
+        shortopt: String,
         longopt: String,
+        keyName: String,
         valueName: String,
         description: String,
         action: String => Unit,
-        gobbleNextArgument: Boolean) {
-
+        gobbleNextArgument: Boolean,
+        keyValueArgument: Boolean) {
   def shortDescription = "option " + longopt
 }
 
 // ----- Some standard option types ---------
 class SeparatorDefinition(
         description: String
-        ) extends OptionDefinition(false, null, null, null,
-          description, {a: String => {}}, false)
+        ) extends OptionDefinition(false, null, null, null, null,
+          description, {a: String => {}}, false, false)
 
 class Argument(
         name: String,
         description: String,
         action: String => Unit
-        ) extends OptionDefinition(false, null, name, null, 
-          description, action, false) {
+        ) extends OptionDefinition(false, null, name, null, null, 
+          description, action, false, false) {
 
   override def shortDescription = "argument " + name
 }
@@ -40,8 +41,8 @@ class ArgOptionDefinition(
         valueName: String,
         description: String,
         action: String => Unit
-        ) extends OptionDefinition(true, shortopt, longopt, valueName,
-          description, action, true)
+        ) extends OptionDefinition(true, shortopt, longopt, null, valueName,
+          description, action, true, false)
 
 class IntArgOptionDefinition(
         shortopt: String,
@@ -49,8 +50,8 @@ class IntArgOptionDefinition(
         valueName: String,
         description: String,
         action: Int => Unit
-        ) extends OptionDefinition(true, shortopt, longopt, valueName,
-          description, {a: String => action(a.toInt)}, true)
+        ) extends OptionDefinition(true, shortopt, longopt, null, valueName,
+          description, {a: String => action(a.toInt)}, true, false)
 
 class DoubleArgOptionDefinition(
         shortopt: String,
@@ -58,8 +59,8 @@ class DoubleArgOptionDefinition(
         valueName: String,
         description: String,
         action: Double => Unit
-        ) extends OptionDefinition(true, shortopt, longopt, valueName,
-          description, {a: String => action(a.toDouble)}, true)
+        ) extends OptionDefinition(true, shortopt, longopt, null, valueName,
+          description, {a: String => action(a.toDouble)}, true, false)
 
 class BooleanArgOptionDefinition(
         shortopt: String,
@@ -67,9 +68,8 @@ class BooleanArgOptionDefinition(
         valueName: String,
         description: String,
         action: Boolean => Unit
-        ) extends OptionDefinition(true, shortopt, longopt, valueName, 
-          description, {
-  a: String =>
+        ) extends OptionDefinition(true, shortopt, longopt, null, valueName, 
+          description, { a: String =>
     val boolValue = a.toLowerCase match {
       case "true" => true
       case "false" => false
@@ -80,17 +80,31 @@ class BooleanArgOptionDefinition(
       case _ =>
         throw new IllegalArgumentException("Expected a string I can interpret as a boolean")
     }
-    action(boolValue)
-}, true)
+    action(boolValue)},
+    true, false)
+
+class KeyValueArgOptionDefinition(
+        shortopt: String,
+        longopt: String,
+        keyName: String,
+        valueName: String,
+        description: String,
+        action: (String, String) => Unit
+        ) extends OptionDefinition(true, shortopt, longopt, keyName, valueName, 
+          description, { a: String =>
+  a.indexOf('=') match {
+    case -1     => action(a, "")
+    case n: Int => action(a.dropRight(a.length - n), a.drop(n + 1))
+  }},
+  false, true)
 
 class FlagOptionDefinition(
         shortopt: String,
         longopt: String,
         description: String,
         action: => Unit
-        ) extends OptionDefinition(true, shortopt, longopt, null,
-          description, {a: String => action}, false)
-
+        ) extends OptionDefinition(true, shortopt, longopt, null, null,
+          description, {a: String => action}, false, false)
 
 /**
  * OptionParser is instantiated within your object,
@@ -112,6 +126,7 @@ case class OptionParser(
   val TB = "\t"
   val NLTB = NL + TB
   val NLNL = NL + NL
+  val defaultKeyName = "<key>"
   val defaultValueName = "<value>"
   
   // -------- Defining options ---------------
@@ -154,7 +169,14 @@ case class OptionParser(
   def booleanOpt(shortopt: String, longopt: String, valueName: String,
       description: String, action: Boolean => Unit) =
     add(new BooleanArgOptionDefinition(shortopt, longopt, valueName, description, action))
-  
+
+  def keyValueOpt(shortopt: String, longopt: String, description: String, action: (String, String) => Unit) =
+    add(new KeyValueArgOptionDefinition(shortopt, longopt, defaultKeyName, defaultValueName, description, action))
+    
+  def keyValueOpt(shortopt: String, longopt: String, keyName: String, valueName: String,
+      description: String, action: (String, String) => Unit) =
+    add(new KeyValueArgOptionDefinition(shortopt, longopt, keyName, valueName, description, action))
+       
   def help(shortopt: String, longopt: String, description: String = "show this help message") =
     add(new FlagOptionDefinition(shortopt, longopt, description, {this.showUsage; exit}))
 
@@ -170,6 +192,9 @@ case class OptionParser(
   def descriptions: Seq[String] = options.map(opt => opt match {
     //case x: Argument => x.longopt + " :" + NLTB + opt.description
     case x if !x.canBeInvoked => x.description
+    case x if x.keyValueArgument =>
+      "-" + x.shortopt + ":" + x.keyName + "=" + x.valueName + " | " +
+      "--" + x.longopt + ":" + x.keyName + "=" + x.valueName + NLTB + x.description    
     case x if x.gobbleNextArgument =>
       "-" + x.shortopt + " " + x.valueName + " | " +
       "--" + x.longopt + " " + x.valueName + NLTB + x.description
@@ -185,7 +210,8 @@ case class OptionParser(
     }
     val optionText = if (options.isEmpty) {""} else {"[options] "}
     val argumentList = argumentNames.mkString(" ")
-    NL + "Usage: " + prorgamText + optionText + argumentList + NLNL + "  " + descriptions.mkString(NL + "  ") + NL
+    NL + "Usage: " + prorgamText + optionText + argumentList + NLNL + 
+    "  " + descriptions.mkString(NL + "  ") + NL
   }
 
   def showUsage = Console.err.println(usage)
@@ -196,8 +222,7 @@ case class OptionParser(
       try {
         option.action.apply(arg)
         true
-      }
-      catch {
+      } catch {
         case e:NumberFormatException => System.err.println("Error: " +
                 option.shortDescription + " expects a number but was given '" + arg + "'")
         false
@@ -216,28 +241,36 @@ case class OptionParser(
     while (i < args.length) {
       val arg = args(i)
       val matchingOption = options.find(opt =>
-        opt.canBeInvoked
-                && (arg == "-" + opt.shortopt || arg == "--" + opt.longopt)
-        )
-
+        opt.canBeInvoked &&
+          ((!opt.keyValueArgument &&
+            (arg == "-" + opt.shortopt || arg == "--" + opt.longopt)) ||
+          (opt.keyValueArgument &&
+            (arg.startsWith("-" + opt.shortopt + ":") || arg.startsWith("--" + opt.longopt + ":"))))
+      )
+      
       matchingOption match {
         case None =>
           if (requiredArgs.isEmpty) {
             System.err.println("Error: Unknown argument '" + arg + "'")
             answer = false
-          }
-          else {
+          } else {
             val first = requiredArgs.remove(0)
             if (!applyArgument(first, arg)) {
               answer = false
             }
           }
+          
         case Some(option) =>
           val argToPass = if (option.gobbleNextArgument) {
             i += 1;
             args(i)
+          } else if (option.keyValueArgument && arg.startsWith("-" + option.shortopt + ":")) {
+            arg.drop(("-" + option.shortopt + ":").length)
+          } else if (option.keyValueArgument && arg.startsWith("--" + option.longopt + ":")) {
+            arg.drop(("--" + option.longopt + ":").length)
           } else
             ""
+          
           if (!applyArgument(option, argToPass)) {
             answer = false
           }
@@ -247,8 +280,7 @@ case class OptionParser(
 
     if (requiredArgs.isEmpty) {
       answer
-    }
-    else {
+    } else {
       System.err.println("Error: missing arguments: " + argumentNames.mkString(", "))
       showUsage
       false
