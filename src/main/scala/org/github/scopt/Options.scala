@@ -278,7 +278,7 @@ case class OptionParser(
     case _ =>
       "-" + opt.shortopt + " | " + 
       "--" + opt.longopt + NLTB + opt.description
-  }) ++ arguments.map(a => a.longopt + NLTB + a.description)
+  }) ++= arguments.map(a => a.longopt + NLTB + a.description)
   
   def usage: String = {
     val prorgamText = programName match {
