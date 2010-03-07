@@ -179,7 +179,7 @@ case class OptionParser(
   val options = new ListBuffer[OptionDefinition]
   val arguments = new ListBuffer[Argument]
   val NL = System.getProperty("line.separator")
-  val TB = "\t"
+  val TB = "        "
   val NLTB = NL + TB
   val NLNL = NL + NL
   val defaultKeyName = "<key>"

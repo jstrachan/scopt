@@ -34,15 +34,15 @@ The above generates the following usage text:
     Usage: scopt [options] <filename>
     
       -f <value> | --foo <value>
-    	      foo is an integer property
+            foo is an integer property
       -o <file> | --output <file>
-          	output is a string property
+            output is a string property
       -x <value> | --xyz <value>
-    	      xyz is a boolean property
+            xyz is a boolean property
       -l:<libname>=<filename> | --lib:<libname>=<filename>
-          	load library <libname>
-      <filename>
-    	      some argument
+            load library <libname>
+      <file>
+            some argument
 
 Building
 --------
