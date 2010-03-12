@@ -20,7 +20,9 @@ Create an *OptionParser* and customise it with the options you need, passing in 
       booleanOpt("x", "xyz", "xyz is a boolean property", {v: Boolean => config.xyz = v})
       keyValueOpt("l", "lib", "<libname>", "<filename>", "load library <libname>",
         {(key: String, value: String) => { config.libname = key; config.libfile = value } })
-      arg("<filename>", "some argument", {v: String => config.whatnot = v})
+      arg("<singlefile>", "<singlefile> is an argument", {v: String => config.whatnot = v})
+      // arglist("<file>...", "arglist allows variable number of arguments",
+      //   {v: String => config.files = (v :: config.files).reverse })
     }
     if (parser.parse(args)) {
        // do stuff
@@ -41,8 +43,8 @@ The above generates the following usage text:
             xyz is a boolean property
       -l:<libname>=<filename> | --lib:<libname>=<filename>
             load library <libname>
-      <file>
-            some argument
+      <singlefile>
+            <singlefile> is an argument
 
 Building
 --------
