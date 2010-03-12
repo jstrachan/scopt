@@ -28,8 +28,9 @@ class SeparatorDefinition(
 class Argument(
         name: String,
         description: String,
+        val allowMultiple: Boolean,
         action: String => Unit
-        ) extends OptionDefinition(false, null, name, null, null, 
+        ) extends OptionDefinition(false, null, name, null, name, 
           description, action, false, false) {
 
   override def shortDescription = "argument " + name
@@ -169,12 +170,12 @@ class FlagOptionDefinition(
  */
 case class OptionParser(
         programName: Option[String],
-        warnOnUnknownArgument: Boolean) {
+        errorOnUnknownArgument: Boolean) {
   def this() = this(None, true)
   def this(programName: String) = this(Some(programName), true)
-  def this(warnOnUnknownArgument: Boolean) = this(None, warnOnUnknownArgument)
-  def this(programName: String, warnOnUnknownArgument: Boolean) =
-    this(Some(programName), warnOnUnknownArgument)
+  def this(errorOnUnknownArgument: Boolean) = this(None, errorOnUnknownArgument)
+  def this(programName: String, errorOnUnknownArgument: Boolean) =
+    this(Some(programName), errorOnUnknownArgument)
 
   val options = new ListBuffer[OptionDefinition]
   val arguments = new ListBuffer[Argument]
@@ -184,11 +185,16 @@ case class OptionParser(
   val NLNL = NL + NL
   val defaultKeyName = "<key>"
   val defaultValueName = "<value>"
+  var argList: Option[Argument] = None
   
   // -------- Defining options ---------------
   def add(option: OptionDefinition) {
     option match {
-      case a: Argument => arguments += a
+      case a: Argument =>
+        if (a.allowMultiple)
+          argList = Some(a)
+        else
+          arguments += a
       case _ => options += option
     }
   }
@@ -262,8 +268,11 @@ case class OptionParser(
 
   // regular arguments without the - or -- which have a name purely for help
   def arg(name: String, description: String, action: String => Unit) =
-    add(new Argument(name, description, action))
-
+    add(new Argument(name, description, false, action))
+  
+  // arglist allows multiple arguments
+  def arglist(name: String, description: String, action: String => Unit) =
+    add(new Argument(name, description, true, action))
 
   // -------- Getting usage information ---------------
   def descriptions: Seq[String] = options.map(opt => opt match {
@@ -278,7 +287,10 @@ case class OptionParser(
     case _ =>
       "-" + opt.shortopt + " | " + 
       "--" + opt.longopt + NLTB + opt.description
-  }) ++= arguments.map(a => a.longopt + NLTB + a.description)
+  }) ++= (argList match {
+    case Some(x: Argument) => List(x.valueName + NLTB + x.description)
+    case None              => arguments.map(a => a.valueName + NLTB + a.description)
+  })
   
   def usage: String = {
     val prorgamText = programName match {
@@ -293,7 +305,10 @@ case class OptionParser(
 
   def showUsage = Console.err.println(usage)
 
-  def argumentNames = arguments.map(_.longopt)
+  def argumentNames: Seq[String] = argList match {
+    case Some(x: Argument) => List(x.valueName)
+    case None              => arguments.map(_.valueName)
+  }
 
   def applyArgument(option:OptionDefinition, arg:String) :Boolean ={
       try {
@@ -314,6 +329,7 @@ case class OptionParser(
     var i = 0
     val requiredArgs = arguments.clone
     var answer = true
+    var argListCount = 0
 
     while (i < args.length) {
       val arg = args(i)
@@ -327,9 +343,23 @@ case class OptionParser(
       
       matchingOption match {
         case None =>
-          if (requiredArgs.isEmpty) {
-            System.err.println("Error: Unknown argument '" + arg + "'")
-            answer = false
+          if (arg.startsWith("-")) {
+            if (errorOnUnknownArgument) {
+              System.err.println("Error: Unknown argument '" + arg + "'")
+              answer = false              
+            } else
+              System.err.println("Warning: Unknown argument '" + arg + "'")
+          } else if (argList.isDefined) {
+            argListCount += 1
+            if (!applyArgument(argList.get, arg)) {
+              answer = false
+            }            
+          } else if (requiredArgs.isEmpty) {
+            if (errorOnUnknownArgument) {
+              System.err.println("Error: Unknown argument '" + arg + "'")
+              answer = false              
+            } else
+              System.err.println("Warning: Unknown argument '" + arg + "'")
           } else {
             val first = requiredArgs.remove(0)
             if (!applyArgument(first, arg)) {
@@ -354,13 +384,14 @@ case class OptionParser(
       }
       i += 1
     }
-
-    if (requiredArgs.isEmpty) {
-      answer
-    } else {
+    
+    if (!requiredArgs.isEmpty ||
+        (argListCount == 0 && argList.isDefined)) {
       System.err.println("Error: missing arguments: " + argumentNames.mkString(", "))
-      showUsage
-      false
+      answer = false      
     }
+    if (!answer)
+      showUsage
+    answer
   }
 }
