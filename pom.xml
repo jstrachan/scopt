@@ -12,7 +12,7 @@
     <!--
     <scalaVersion>2.7.7</scalaVersion>
     -->
-    <scalaVersion>2.8.0.Beta1-RC7</scalaVersion>
+    <scalaVersion>2.8.0</scalaVersion>
   </properties>
 
   <pluginRepositories>
@@ -46,7 +46,7 @@
       </snapshots>
     </repository>
     <repository>
-      <id>snapshots.scala-tools.org</id>
+      <id>www.scala-tools.org</id>
       <name>Scala-Tools Maven2 Snapshot Repository</name>
       <url>http://scala-tools.org/repo-snapshots</url>
       <snapshots>
@@ -128,7 +128,7 @@
     <dependency>
       <groupId>org.scalatest</groupId>
       <artifactId>scalatest</artifactId>
-      <version>1.0.1-for-scala-2.8.0.Beta1-RC5-with-test-interfaces-0.2-SNAPSHOT</version>
+      <version>1.2</version>
       <!--
             <version>1.0</version>
       -->
