@@ -67,4 +67,5 @@ Changes
 * added ScalaTest test cases
 * added arguments which then are displayed in help
 * minor refactoring of names; opt and arg for options and args
-  
+* updated sbt and maven to build against Scala 2.8.0 
+
