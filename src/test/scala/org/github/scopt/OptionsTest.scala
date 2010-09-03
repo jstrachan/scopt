@@ -28,10 +28,10 @@ class OptionsTest extends FunSuite {
   val parser1 = new OptionParser("scopt") {
     intOpt("f", "foo", "foo is an integer property", {v: Int => config.foo = v})
     opt("o", "output", "<file>", "output is a string property", {v: String => config.bar = v})
-    booleanOpt("x", "xyz", "xyz is a boolean property", {v: Boolean => config.xyz = v})
+    booleanOpt("xyz", "xyz is a boolean property", {v: Boolean => config.xyz = v})
     keyValueOpt("l", "lib", "<libname>", "<filename>", "load library <libname>",
       {(key: String, value: String) => { config.libname = key; config.libfile = value } })
-    keyIntValueOpt("m", "max", "<libname>", "<max>", "maximum count for <libname>",
+    keyIntValueOpt(None, "max", "<libname>", "<max>", "maximum count for <libname>",
       {(key: String, value: Int) => { config.maxlibname = key; config.maxcount = value } })
     arg("<file>", "some argument", {v: String => config.whatnot = v})
   }
@@ -42,7 +42,8 @@ class OptionsTest extends FunSuite {
     validArguments(parser1, Config(foo = 22, bar = "beer", whatnot = "drink"), "-o", "beer", "-f", "22", "drink")
     validArguments(parser1, Config(foo = 22, bar = "beer", whatnot = "drink"), "-f", "22", "--output", "beer", "drink")
     validArguments(parser1, Config(libname = "key", libfile = "value", whatnot = "drink"), "--lib:key=value", "drink")
-    validArguments(parser1, Config(maxlibname = "key", maxcount = 5, whatnot = "drink"), "-m:key=5", "drink")
+    validArguments(parser1, Config(maxlibname = "key", maxcount = 5, whatnot = "drink"), "--max:key=5", "drink")
+    validArguments(parser1, Config(xyz = true, whatnot = "drink"), "--xyz", "true", "drink")
   }
 
   test("invalid arguments fail") {
@@ -58,7 +59,7 @@ class OptionsTest extends FunSuite {
   }
 
   test("bad booleans fail to parse nicely") {
-    invalidArguments(parser1, "-x", "shouldBeBoolean", "blah")
+    invalidArguments(parser1, "--xyz", "shouldBeBoolean", "blah")
   }
 
   val parser2 = new OptionParser("scopt") {

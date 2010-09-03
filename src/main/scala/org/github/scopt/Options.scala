@@ -8,7 +8,7 @@ import collection.mutable.ListBuffer
 // usually mutating a var.
 case class OptionDefinition(
         canBeInvoked: Boolean,
-        shortopt: String,
+        shortopt: Option[String],
         longopt: String,
         keyName: String,
         valueName: String,
@@ -37,7 +37,7 @@ class Argument(
 }
 
 class ArgOptionDefinition(
-        shortopt: String,
+        shortopt: Option[String],
         longopt: String,
         valueName: String,
         description: String,
@@ -46,7 +46,7 @@ class ArgOptionDefinition(
           description, action, true, false)
 
 class IntArgOptionDefinition(
-        shortopt: String,
+        shortopt: Option[String],
         longopt: String,
         valueName: String,
         description: String,
@@ -55,7 +55,7 @@ class IntArgOptionDefinition(
           description, {a: String => action(a.toInt)}, true, false)
 
 class DoubleArgOptionDefinition(
-        shortopt: String,
+        shortopt: Option[String],
         longopt: String,
         valueName: String,
         description: String,
@@ -64,7 +64,7 @@ class DoubleArgOptionDefinition(
           description, {a: String => action(a.toDouble)}, true, false)
 
 class BooleanArgOptionDefinition(
-        shortopt: String,
+        shortopt: Option[String],
         longopt: String,
         valueName: String,
         description: String,
@@ -85,7 +85,7 @@ class BooleanArgOptionDefinition(
     true, false)
 
 class KeyValueArgOptionDefinition(
-        shortopt: String,
+        shortopt: Option[String],
         longopt: String,
         keyName: String,
         valueName: String,
@@ -100,7 +100,7 @@ class KeyValueArgOptionDefinition(
   false, true)
 
 class KeyIntValueArgOptionDefinition(
-        shortopt: String,
+        shortopt: Option[String],
         longopt: String,
         keyName: String,
         valueName: String,
@@ -115,7 +115,7 @@ class KeyIntValueArgOptionDefinition(
   false, true)
 
 class KeyDoubleValueArgOptionDefinition(
-        shortopt: String,
+        shortopt: Option[String],
         longopt: String,
         keyName: String,
         valueName: String,
@@ -130,7 +130,7 @@ class KeyDoubleValueArgOptionDefinition(
   false, true)
 
 class KeyBooleanValueArgOptionDefinition(
-        shortopt: String,
+        shortopt: Option[String],
         longopt: String,
         keyName: String,
         valueName: String,
@@ -156,7 +156,7 @@ class KeyBooleanValueArgOptionDefinition(
     false, true)
       
 class FlagOptionDefinition(
-        shortopt: String,
+        shortopt: Option[String],
         longopt: String,
         description: String,
         action: => Unit
@@ -201,68 +201,130 @@ case class OptionParser(
 
   // setup options (which require -char or --string to invoke
   def opt(shortopt: String, longopt: String, description: String, action: String => Unit) =
-    add(new ArgOptionDefinition(shortopt, longopt, defaultValueName, description, action))
+    add(new ArgOptionDefinition(Some(shortopt), longopt, defaultValueName, description, action))
 
+  def opt(longopt: String, description: String, action: String => Unit) =
+    add(new ArgOptionDefinition(None, longopt, defaultValueName, description, action))
+      
   def opt(shortopt: String, longopt: String, valueName: String,
       description: String, action: String => Unit) =
+    add(new ArgOptionDefinition(Some(shortopt), longopt, valueName, description, action))
+  
+  def opt(shortopt: Option[String], longopt: String, valueName: String,
+      description: String, action: String => Unit) =
     add(new ArgOptionDefinition(shortopt, longopt, valueName, description, action))
-
+      
   def opt(shortopt: String, longopt: String, description: String, action: => Unit) =
-    add(new FlagOptionDefinition(shortopt, longopt, description, action))
+    add(new FlagOptionDefinition(Some(shortopt), longopt, description, action))
 
+  def opt(longopt: String, description: String, action: => Unit) =
+    add(new FlagOptionDefinition(None, longopt, description, action))
+      
   // we have to give these typed options separate names, because of &^@$! type erasure
   def intOpt(shortopt: String, longopt: String, description: String, action: Int => Unit) =
-    add(new IntArgOptionDefinition(shortopt, longopt, defaultValueName, description, action))
+    add(new IntArgOptionDefinition(Some(shortopt), longopt, defaultValueName, description, action))
 
+  def intOpt(longopt: String, description: String, action: Int => Unit) =
+    add(new IntArgOptionDefinition(None, longopt, defaultValueName, description, action))
+      
   def intOpt(shortopt: String, longopt: String, valueName: String,
+      description: String, action: Int => Unit) =
+    add(new IntArgOptionDefinition(Some(shortopt), longopt, valueName, description, action))
+
+  def intOpt(shortopt: Option[String], longopt: String, valueName: String,
       description: String, action: Int => Unit) =
     add(new IntArgOptionDefinition(shortopt, longopt, valueName, description, action))
       
   def doubleOpt(shortopt: String, longopt: String, description: String, action: Double => Unit) =
-    add(new DoubleArgOptionDefinition(shortopt, longopt, defaultValueName, description, action))
+    add(new DoubleArgOptionDefinition(Some(shortopt), longopt, defaultValueName, description, action))
 
+  def doubleOpt(longopt: String, description: String, action: Double => Unit) =
+    add(new DoubleArgOptionDefinition(None, longopt, defaultValueName, description, action))
+      
   def doubleOpt(shortopt: String, longopt: String, valueName: String,
       description: String, action: Double => Unit) =
-    add(new DoubleArgOptionDefinition(shortopt, longopt, valueName, description, action))
-      
-  def booleanOpt(shortopt: String, longopt: String, description: String, action: Boolean => Unit) =
-    add(new BooleanArgOptionDefinition(shortopt, longopt, defaultValueName, description, action))
+    add(new DoubleArgOptionDefinition(Some(shortopt), longopt, valueName, description, action))
 
+  def doubleOpt(shortopt: Option[String], longopt: String, valueName: String,
+      description: String, action: Double => Unit) =
+    add(new DoubleArgOptionDefinition(shortopt, longopt, valueName, description, action))
+    
+  def booleanOpt(shortopt: String, longopt: String, description: String, action: Boolean => Unit) =
+    add(new BooleanArgOptionDefinition(Some(shortopt), longopt, defaultValueName, description, action))
+
+  def booleanOpt(longopt: String, description: String, action: Boolean => Unit) =
+    add(new BooleanArgOptionDefinition(None, longopt, defaultValueName, description, action))
+  
   def booleanOpt(shortopt: String, longopt: String, valueName: String,
       description: String, action: Boolean => Unit) =
-    add(new BooleanArgOptionDefinition(shortopt, longopt, valueName, description, action))
+    add(new BooleanArgOptionDefinition(Some(shortopt), longopt, valueName, description, action))
 
+  def booleanOpt(shortopt: Option[String], longopt: String, valueName: String,
+      description: String, action: Boolean => Unit) =
+    add(new BooleanArgOptionDefinition(shortopt, longopt, valueName, description, action))
+      
   def keyValueOpt(shortopt: String, longopt: String, description: String, action: (String, String) => Unit) =
-    add(new KeyValueArgOptionDefinition(shortopt, longopt, defaultKeyName, defaultValueName, description, action))
-    
+    add(new KeyValueArgOptionDefinition(Some(shortopt), longopt, defaultKeyName, defaultValueName, description, action))
+
+  def keyValueOpt(longopt: String, description: String, action: (String, String) => Unit) =
+    add(new KeyValueArgOptionDefinition(None, longopt, defaultKeyName, defaultValueName, description, action))
+  
   def keyValueOpt(shortopt: String, longopt: String, keyName: String, valueName: String,
       description: String, action: (String, String) => Unit) =
+    add(new KeyValueArgOptionDefinition(Some(shortopt), longopt, keyName, valueName, description, action))
+
+  def keyValueOpt(shortopt: Option[String], longopt: String, keyName: String, valueName: String,
+      description: String, action: (String, String) => Unit) =
     add(new KeyValueArgOptionDefinition(shortopt, longopt, keyName, valueName, description, action))
-
+  
   def keyIntValueOpt(shortopt: String, longopt: String, description: String, action: (String, Int) => Unit) =
-    add(new KeyIntValueArgOptionDefinition(shortopt, longopt, defaultKeyName, defaultValueName, description, action))
+    add(new KeyIntValueArgOptionDefinition(Some(shortopt), longopt, defaultKeyName, defaultValueName, description, action))
 
+  def keyIntValueOpt(longopt: String, description: String, action: (String, Int) => Unit) =
+    add(new KeyIntValueArgOptionDefinition(None, longopt, defaultKeyName, defaultValueName, description, action))
+  
   def keyIntValueOpt(shortopt: String, longopt: String, keyName: String, valueName: String,
       description: String, action: (String, Int) => Unit) =
+    add(new KeyIntValueArgOptionDefinition(Some(shortopt), longopt, keyName, valueName, description, action))
+
+  def keyIntValueOpt(shortopt: Option[String], longopt: String, keyName: String, valueName: String,
+      description: String, action: (String, Int) => Unit) =
     add(new KeyIntValueArgOptionDefinition(shortopt, longopt, keyName, valueName, description, action))
-
+  
   def keyDoubleValueOpt(shortopt: String, longopt: String, description: String, action: (String, Double) => Unit) =
-    add(new KeyDoubleValueArgOptionDefinition(shortopt, longopt, defaultKeyName, defaultValueName, description, action))
+    add(new KeyDoubleValueArgOptionDefinition(Some(shortopt), longopt, defaultKeyName, defaultValueName, description, action))
 
+  def keyDoubleValueOpt(longopt: String, description: String, action: (String, Double) => Unit) =
+    add(new KeyDoubleValueArgOptionDefinition(None, longopt, defaultKeyName, defaultValueName, description, action))
+    
   def keyDoubleValueOpt(shortopt: String, longopt: String, keyName: String, valueName: String,
       description: String, action: (String, Double) => Unit) =
+    add(new KeyDoubleValueArgOptionDefinition(Some(shortopt), longopt, keyName, valueName, description, action))
+
+  def keyDoubleValueOpt(shortopt: Option[String], longopt: String, keyName: String, valueName: String,
+      description: String, action: (String, Double) => Unit) =
     add(new KeyDoubleValueArgOptionDefinition(shortopt, longopt, keyName, valueName, description, action))
-    
+
   def keyBooleanValueOpt(shortopt: String, longopt: String, description: String, action: (String, Boolean) => Unit) =
-    add(new KeyBooleanValueArgOptionDefinition(shortopt, longopt, defaultKeyName, defaultValueName, description, action))
+    add(new KeyBooleanValueArgOptionDefinition(Some(shortopt), longopt, defaultKeyName, defaultValueName, description, action))
+
+  def keyBooleanValueOpt(longopt: String, description: String, action: (String, Boolean) => Unit) =
+    add(new KeyBooleanValueArgOptionDefinition(None, longopt, defaultKeyName, defaultValueName, description, action))
 
   def keyBooleanValueOpt(shortopt: String, longopt: String, keyName: String, valueName: String,
       description: String, action: (String, Boolean) => Unit) =
-    add(new KeyBooleanValueArgOptionDefinition(shortopt, longopt, keyName, valueName, description, action))
-    
-  def help(shortopt: String, longopt: String, description: String = "show this help message") =
-    add(new FlagOptionDefinition(shortopt, longopt, description, {this.showUsage; exit}))
+    add(new KeyBooleanValueArgOptionDefinition(Some(shortopt), longopt, keyName, valueName, description, action))
 
+  def keyBooleanValueOpt(shortopt: Option[String], longopt: String, keyName: String, valueName: String,
+      description: String, action: (String, Boolean) => Unit) =
+    add(new KeyBooleanValueArgOptionDefinition(shortopt, longopt, keyName, valueName, description, action))
+  
+  def help(shortopt: String, longopt: String, description: String = "show this help message") =
+    add(new FlagOptionDefinition(Some(shortopt), longopt, description, {this.showUsage; exit}))
+
+  def help(shortopt: Option[String], longopt: String, description: String) =
+    add(new FlagOptionDefinition(shortopt, longopt, description, {this.showUsage; exit}))
+  
   def separator(description: String) =
     add(new SeparatorDefinition(description))
 
@@ -279,13 +341,13 @@ case class OptionParser(
     //case x: Argument => x.longopt + " :" + NLTB + opt.description
     case x if !x.canBeInvoked => x.description
     case x if x.keyValueArgument =>
-      "-" + x.shortopt + ":" + x.keyName + "=" + x.valueName + " | " +
+      (x.shortopt map { o => "-" + o + ":" + x.keyName + "=" + x.valueName + " | " } getOrElse { "" }) +
       "--" + x.longopt + ":" + x.keyName + "=" + x.valueName + NLTB + x.description    
     case x if x.gobbleNextArgument =>
-      "-" + x.shortopt + " " + x.valueName + " | " +
+      (x.shortopt map { o => "-" + o + " " + x.valueName + " | " } getOrElse { "" }) +
       "--" + x.longopt + " " + x.valueName + NLTB + x.description
     case _ =>
-      "-" + opt.shortopt + " | " + 
+      (opt.shortopt map { o => "-" + o + " | " } getOrElse { "" }) + 
       "--" + opt.longopt + NLTB + opt.description
   }) ++= (argList match {
     case Some(x: Argument) => List(x.valueName + NLTB + x.description)
@@ -336,9 +398,11 @@ case class OptionParser(
       val matchingOption = options.find(opt =>
         opt.canBeInvoked &&
           ((!opt.keyValueArgument &&
-            (arg == "-" + opt.shortopt || arg == "--" + opt.longopt)) ||
+            (arg == "--" + opt.longopt ||
+            (opt.shortopt map { o => arg == "-" + o } getOrElse { false }))) ||
           (opt.keyValueArgument &&
-            (arg.startsWith("-" + opt.shortopt + ":") || arg.startsWith("--" + opt.longopt + ":"))))
+            (arg.startsWith("--" + opt.longopt + ":") ||
+            (opt.shortopt map { o => arg.startsWith("-" + o + ":") } getOrElse { false }))))
       )
       
       matchingOption match {
@@ -371,9 +435,11 @@ case class OptionParser(
           val argToPass = if (option.gobbleNextArgument) {
             i += 1;
             args(i)
-          } else if (option.keyValueArgument && arg.startsWith("-" + option.shortopt + ":")) {
-            arg.drop(("-" + option.shortopt + ":").length)
-          } else if (option.keyValueArgument && arg.startsWith("--" + option.longopt + ":")) {
+          } else if (option.keyValueArgument &&
+              (option.shortopt map { o => arg.startsWith("-" + o + ":") } getOrElse { false })) {
+            arg.drop(("-" + option.shortopt.get + ":").length)
+          } else if (option.keyValueArgument &&
+              arg.startsWith("--" + option.longopt + ":")) {
             arg.drop(("--" + option.longopt + ":").length)
           } else
             ""

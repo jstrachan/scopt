@@ -17,7 +17,7 @@ Create an *OptionParser* and customise it with the options you need, passing in 
     val parser = new OptionParser("scopt") {
       intOpt("f", "foo", "foo is an integer property", {v: Int => config.foo = v})
       opt("o", "output", "<file>", "output is a string property", {v: String => config.bar = v})
-      booleanOpt("x", "xyz", "xyz is a boolean property", {v: Boolean => config.xyz = v})
+      booleanOpt("xyz", "xyz is a boolean property", {v: Boolean => config.xyz = v})
       keyValueOpt("l", "lib", "<libname>", "<filename>", "load library <libname>",
         {(key: String, value: String) => { config.libname = key; config.libfile = value } })
       arg("<singlefile>", "<singlefile> is an argument", {v: String => config.whatnot = v})
@@ -39,7 +39,7 @@ The above generates the following usage text:
             foo is an integer property
       -o <file> | --output <file>
             output is a string property
-      -x <value> | --xyz <value>
+      --xyz <value>
             xyz is a boolean property
       -l:<libname>=<filename> | --lib:<libname>=<filename>
             load library <libname>
@@ -61,11 +61,10 @@ Changes
 -------
 
 * added -x:key=value option 
-* updated usage text style 
-* updated sbt build to build against 2.8.0.Beta1
+* updated usage text style
 * added maven and sbt builds
 * added ScalaTest test cases
 * added arguments which then are displayed in help
 * minor refactoring of names; opt and arg for options and args
 * updated sbt and maven to build against Scala 2.8.0 
-
+* added option that does not have short option
