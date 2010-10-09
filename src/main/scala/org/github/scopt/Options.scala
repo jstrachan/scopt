@@ -392,6 +392,7 @@ case class OptionParser(
     val requiredArgs = arguments.clone
     var answer = true
     var argListCount = 0
+    var indexOutOfBounds = false
 
     while (i < args.length) {
       val arg = args(i)
@@ -434,7 +435,17 @@ case class OptionParser(
         case Some(option) =>
           val argToPass = if (option.gobbleNextArgument) {
             i += 1;
-            args(i)
+            
+            if (i >= args.length) {
+              indexOutOfBounds = true
+              if (errorOnUnknownArgument) {
+                System.err.println("Error: missing value after '" + arg + "'")
+                answer = false
+              } else
+                System.err.println("Warning: missing value after '" + arg + "'")
+              ""
+            } else
+              args(i)
           } else if (option.keyValueArgument &&
               (option.shortopt map { o => arg.startsWith("-" + o + ":") } getOrElse { false })) {
             arg.drop(("-" + option.shortopt.get + ":").length)
@@ -444,7 +455,7 @@ case class OptionParser(
           } else
             ""
           
-          if (!applyArgument(option, argToPass)) {
+          if (!indexOutOfBounds && !applyArgument(option, argToPass)) {
             answer = false
           }
       }

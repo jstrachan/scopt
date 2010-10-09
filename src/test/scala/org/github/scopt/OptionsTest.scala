@@ -52,6 +52,7 @@ class OptionsTest extends FunSuite {
     invalidArguments(parser1, "blah", "blah")
     invalidArguments(parser1, "-z", "abc", "blah")
     invalidArguments(parser1, "-f", "22", "-z", "abc", "blah")
+    invalidArguments(parser1, "--xyz")
   }
 
   test("bad numbers fail to parse nicely") {
