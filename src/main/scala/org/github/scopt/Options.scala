@@ -170,12 +170,14 @@ class FlagOptionDefinition(
  */
 case class OptionParser(
         programName: Option[String],
+        version: Option[String],
         errorOnUnknownArgument: Boolean) {
-  def this() = this(None, true)
-  def this(programName: String) = this(Some(programName), true)
-  def this(errorOnUnknownArgument: Boolean) = this(None, errorOnUnknownArgument)
+  def this() = this(None, None, true)
+  def this(programName: String) = this(Some(programName), None, true)
+  def this(programName: String, version: String) = this(Some(programName), Some(version), true)
+  def this(errorOnUnknownArgument: Boolean) = this(None, None, errorOnUnknownArgument)
   def this(programName: String, errorOnUnknownArgument: Boolean) =
-    this(Some(programName), errorOnUnknownArgument)
+    this(Some(programName), None , errorOnUnknownArgument)
 
   val options = new ListBuffer[OptionDefinition]
   val arguments = new ListBuffer[Argument]
@@ -355,13 +357,14 @@ case class OptionParser(
   })
   
   def usage: String = {
-    val prorgamText = programName match {
-      case Some(x) => x + " "
-      case None    => ""
-    }
+    val prorgamText = programName map { _ + " " } getOrElse { "" }
+    val versionText = programName map { pg =>
+      version map { NL + pg + " " + _ } getOrElse { "" }
+    } getOrElse { "" }
     val optionText = if (options.isEmpty) {""} else {"[options] "}
     val argumentList = argumentNames.mkString(" ")
-    NL + "Usage: " + prorgamText + optionText + argumentList + NLNL + 
+
+    versionText + NL + "Usage: " + prorgamText + optionText + argumentList + NLNL +
     "  " + descriptions.mkString(NL + "  ") + NL
   }
 
