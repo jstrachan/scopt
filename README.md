@@ -11,7 +11,7 @@ which is available [as a gist](http://gist.github.com/246481) or [here](http://h
 If you prefer the Annotation approach
 -------------------------------------
 
-Since hacking on scopt I've now moved to the [Annotation Approach via Karaf](Karaf.md) you might like to check that out if you find limitations in scopt.
+Since hacking on scopt I've now moved to the [Annotation Approach via Karaf](https://github.com/jstrachan/scopt/blob/master/Karaf.md) you might like to check that out if you find limitations in scopt.
 
 Usage
 -----
