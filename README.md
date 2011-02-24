@@ -8,6 +8,10 @@ mentioned [in this thread](http://old.nabble.com/-scala--CLI-library--ts19391923
 [this thread](http://old.nabble.com/Parsing-command-lines-argument-in-a-%22scalaesque%22-way-tp26592006p26595257.html)
 which is available [as a gist](http://gist.github.com/246481) or [here](http://harnly.net/tmp/OptionsParser.scala).
 
+If you prefer the Annotation approach
+-------------------------------------
+
+Since hacking on scopt I've now moved to the [Annotation Approach via Karaf](Karaf.md) you might like to check that out if you find limitations in scopt.
 
 Usage
 -----
