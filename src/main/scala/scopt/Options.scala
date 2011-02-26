@@ -1,4 +1,4 @@
-package org.github.scopt
+package scopt
 
 import collection.mutable.ListBuffer
 
@@ -95,7 +95,7 @@ class KeyValueArgOptionDefinition(
           description, { a: String =>
   a.indexOf('=') match {
     case -1     => throw new IllegalArgumentException("Expected a key=value pair")
-    case n: Int => action(a.dropRight(a.length - n), a.drop(n + 1))
+    case n: Int => action(a.slice(0, n), a.slice(n + 1, a.length))
   }},
   false, true)
 
@@ -110,7 +110,7 @@ class KeyIntValueArgOptionDefinition(
           description, { a: String =>
   a.indexOf('=') match {
     case -1     => throw new IllegalArgumentException("Expected a key=value pair")
-    case n: Int => action(a.dropRight(a.length - n), a.drop(n + 1).toInt)
+    case n: Int => action(a.slice(0, n), a.slice(n + 1, a.length).toInt)
   }},
   false, true)
 
@@ -125,7 +125,7 @@ class KeyDoubleValueArgOptionDefinition(
           description, { a: String =>
   a.indexOf('=') match {
     case -1     => throw new IllegalArgumentException("Expected a key=value pair")
-    case n: Int => action(a.dropRight(a.length - n), a.drop(n + 1).toDouble)
+    case n: Int => action(a.slice(0, n), a.slice(n + 1, a.length).toDouble)
   }},
   false, true)
 
@@ -138,11 +138,13 @@ class KeyBooleanValueArgOptionDefinition(
         action: (String, Boolean) => Unit
         ) extends OptionDefinition(true, shortopt, longopt, null, valueName, 
           description, { a: String =>
-    if (!a.contains("="))
-      throw new IllegalArgumentException("Expected a key=value pair")
+    val n = a.indexOf('=') match {
+      case -1     => throw new IllegalArgumentException("Expected a key=value pair")
+      case x: Int => x     
+    }
     
-    val key = a.dropRight(a.length - a.indexOf('='))
-    val boolValue = a.drop(a.indexOf('=') + 1).toLowerCase match {
+    val key = a.slice(0, n) 
+    val boolValue = a.slice(n + 1, a.length).toLowerCase match {
       case "true" => true
       case "false" => false
       case "yes" => true
@@ -321,7 +323,7 @@ case class OptionParser(
       description: String, action: (String, Boolean) => Unit) =
     add(new KeyBooleanValueArgOptionDefinition(shortopt, longopt, keyName, valueName, description, action))
   
-  def help(shortopt: String, longopt: String, description: String = "show this help message") =
+  def help(shortopt: String, longopt: String, description: String) =
     add(new FlagOptionDefinition(Some(shortopt), longopt, description, {this.showUsage; exit}))
 
   def help(shortopt: Option[String], longopt: String, description: String) =
@@ -351,7 +353,7 @@ case class OptionParser(
     case _ =>
       (opt.shortopt map { o => "-" + o + " | " } getOrElse { "" }) + 
       "--" + opt.longopt + NLTB + opt.description
-  }) ++= (argList match {
+  }) ++ (argList match {
     case Some(x: Argument) => List(x.valueName + NLTB + x.description)
     case None              => arguments.map(a => a.valueName + NLTB + a.description)
   })
@@ -436,7 +438,7 @@ case class OptionParser(
           }
           
         case Some(option) =>
-          val argToPass = if (option.gobbleNextArgument) {
+          val argToPass: String = if (option.gobbleNextArgument) {
             i += 1;
             
             if (i >= args.length) {

@@ -50,16 +50,22 @@ The above generates the following usage text:
       <singlefile>
             <singlefile> is an argument
 
+scala-tools.org Nexus
+---------------------
+
+    val scopt = "com.github.scopt" %% "scopt" % "1.0.0-SNAPSHOT"
+    val scalaToolsNexusSnapshots = "Scala Tools Nexus Snapshots" at "http://nexus.scala-tools.org/content/repositories/snapshots/"
+
 Building
 --------
 
-You should be able to use either [maven](http://maven.apache.org) or [sbt](http://code.google.com/p/simple-build-tool/) to build scopt.
+You should be able to use [sbt](http://code.google.com/p/simple-build-tool/) to build scopt.
 
 
 License
 -------
 
-Do whatever you like with it :)
+Do whatever you like with it :), or use MIT License.
 
 Changes
 -------

@@ -1,4 +1,4 @@
-package org.github.scopt
+package scopt
 
 
 import org.scalatest.junit.JUnitRunner
