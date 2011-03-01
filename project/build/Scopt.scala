@@ -16,4 +16,5 @@ class ScoptProject(info: ProjectInfo) extends DefaultProject(info) {
   val mavenLocal = "Local Maven Repository" at "file://"+Path.userHome+"/.m2/repository"
   val publishTo = "Scala Tools Nexus" at "http://nexus.scala-tools.org/content/repositories/snapshots/"
   // val publishTo = "Scala Tools Nexus" at "http://nexus.scala-tools.org/content/repositories/releases/"
+  Credentials(Path.userHome / ".ivy2" / ".credentials", log)
 }
