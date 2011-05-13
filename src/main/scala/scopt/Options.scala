@@ -95,7 +95,7 @@ class KeyValueArgOptionDefinition(
           description, { a: String =>
   a.indexOf('=') match {
     case -1     => throw new IllegalArgumentException("Expected a key=value pair")
-    case n: Int => action(a.slice(0, n), a.slice(n + 1, a.length))
+    case n: Int => action(a.splitAt(n)._1, a.splitAt(n)._2.drop(1))
   }},
   false, true)
 
@@ -110,7 +110,7 @@ class KeyIntValueArgOptionDefinition(
           description, { a: String =>
   a.indexOf('=') match {
     case -1     => throw new IllegalArgumentException("Expected a key=value pair")
-    case n: Int => action(a.slice(0, n), a.slice(n + 1, a.length).toInt)
+    case n: Int => action(a.splitAt(n)._1, a.splitAt(n)._2.drop(1).toInt)
   }},
   false, true)
 
@@ -125,7 +125,7 @@ class KeyDoubleValueArgOptionDefinition(
           description, { a: String =>
   a.indexOf('=') match {
     case -1     => throw new IllegalArgumentException("Expected a key=value pair")
-    case n: Int => action(a.slice(0, n), a.slice(n + 1, a.length).toDouble)
+    case n: Int => action(a.splitAt(n)._1, a.splitAt(n)._2.drop(1).toDouble)
   }},
   false, true)
 
@@ -143,8 +143,8 @@ class KeyBooleanValueArgOptionDefinition(
       case x: Int => x     
     }
     
-    val key = a.slice(0, n) 
-    val boolValue = a.slice(n + 1, a.length).toLowerCase match {
+    val key = a.splitAt(n)._1
+    val boolValue = a.splitAt(n)._2.drop(1).toLowerCase match {
       case "true" => true
       case "false" => false
       case "yes" => true
@@ -353,7 +353,7 @@ case class OptionParser(
     case _ =>
       (opt.shortopt map { o => "-" + o + " | " } getOrElse { "" }) + 
       "--" + opt.longopt + NLTB + opt.description
-  }) ++ (argList match {
+  }) ++= (argList match {
     case Some(x: Argument) => List(x.valueName + NLTB + x.description)
     case None              => arguments.map(a => a.valueName + NLTB + a.description)
   })
@@ -438,7 +438,7 @@ case class OptionParser(
           }
           
         case Some(option) =>
-          val argToPass: String = if (option.gobbleNextArgument) {
+          val argToPass = if (option.gobbleNextArgument) {
             i += 1;
             
             if (i >= args.length) {
