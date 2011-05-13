@@ -11,6 +11,11 @@ class ScoptProject(info: ProjectInfo) extends DefaultProject(info) {
     case _ => "org.scalatest" %% "scalatest" % "1.4.1" % "test"
   }
   
+  override def testAction = crossScalaVersionString match {
+    case "2.7.7" => task {None}
+    case _ => super.testAction
+  }
+  
   val junit = "junit" % "junit" % "4.7" % "test"
   
   override def managedStyle = ManagedStyle.Maven

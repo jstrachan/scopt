@@ -83,6 +83,13 @@ class BooleanArgOptionDefinition(
     }
     action(boolValue)},
     true, false)
+    
+object KeyValueParser {
+  def split(s: String): (String, String) = s.indexOf('=') match {
+    case -1     => throw new IllegalArgumentException("Expected a key=value pair")
+    case n: Int => (s.slice(0, n), s.slice(n + 1, s.length))
+  }
+}
 
 class KeyValueArgOptionDefinition(
         shortopt: Option[String],
@@ -92,12 +99,8 @@ class KeyValueArgOptionDefinition(
         description: String,
         action: (String, String) => Unit
         ) extends OptionDefinition(true, shortopt, longopt, keyName, valueName, 
-          description, { a: String =>
-  a.indexOf('=') match {
-    case -1     => throw new IllegalArgumentException("Expected a key=value pair")
-    case n: Int => action(a.splitAt(n)._1, a.splitAt(n)._2.drop(1))
-  }},
-  false, true)
+          description, { a: String => action(KeyValueParser.split(a)._1, KeyValueParser.split(a)._2) },
+          false, true)
 
 class KeyIntValueArgOptionDefinition(
         shortopt: Option[String],
@@ -107,12 +110,8 @@ class KeyIntValueArgOptionDefinition(
         description: String,
         action: (String, Int) => Unit
         ) extends OptionDefinition(true, shortopt, longopt, keyName, valueName, 
-          description, { a: String =>
-  a.indexOf('=') match {
-    case -1     => throw new IllegalArgumentException("Expected a key=value pair")
-    case n: Int => action(a.splitAt(n)._1, a.splitAt(n)._2.drop(1).toInt)
-  }},
-  false, true)
+          description, { a: String => action(KeyValueParser.split(a)._1, KeyValueParser.split(a)._2.toInt) },
+          false, true)
 
 class KeyDoubleValueArgOptionDefinition(
         shortopt: Option[String],
@@ -122,12 +121,8 @@ class KeyDoubleValueArgOptionDefinition(
         description: String,
         action: (String, Double) => Unit
         ) extends OptionDefinition(true, shortopt, longopt, keyName, valueName, 
-          description, { a: String =>
-  a.indexOf('=') match {
-    case -1     => throw new IllegalArgumentException("Expected a key=value pair")
-    case n: Int => action(a.splitAt(n)._1, a.splitAt(n)._2.drop(1).toDouble)
-  }},
-  false, true)
+          description, { a: String => action(KeyValueParser.split(a)._1, KeyValueParser.split(a)._2.toDouble) },
+          false, true)
 
 class KeyBooleanValueArgOptionDefinition(
         shortopt: Option[String],
@@ -137,25 +132,22 @@ class KeyBooleanValueArgOptionDefinition(
         description: String,
         action: (String, Boolean) => Unit
         ) extends OptionDefinition(true, shortopt, longopt, null, valueName, 
-          description, { a: String =>
-    val n = a.indexOf('=') match {
-      case -1     => throw new IllegalArgumentException("Expected a key=value pair")
-      case x: Int => x     
-    }
-    
-    val key = a.splitAt(n)._1
-    val boolValue = a.splitAt(n)._2.drop(1).toLowerCase match {
-      case "true" => true
-      case "false" => false
-      case "yes" => true
-      case "no" => false
-      case "1" => true
-      case "0" => false
-      case _ =>
-        throw new IllegalArgumentException("Expected a string I can interpret as a boolean")
-    }
-    action(key, boolValue)},
-    false, true)
+          description, { a: String => 
+            val x = KeyValueParser.split(a)
+            val key = x._1
+            val boolValue = x._2.toLowerCase match {
+              case "true" => true
+              case "false" => false
+              case "yes" => true
+              case "no" => false
+              case "1" => true
+              case "0" => false
+              case _ =>
+                throw new IllegalArgumentException("Expected a string I can interpret as a boolean")
+            }
+            action(key, boolValue)
+          },
+          false, true)
       
 class FlagOptionDefinition(
         shortopt: Option[String],
@@ -353,7 +345,7 @@ case class OptionParser(
     case _ =>
       (opt.shortopt map { o => "-" + o + " | " } getOrElse { "" }) + 
       "--" + opt.longopt + NLTB + opt.description
-  }) ++= (argList match {
+  }) ++ (argList match {
     case Some(x: Argument) => List(x.valueName + NLTB + x.description)
     case None              => arguments.map(a => a.valueName + NLTB + a.description)
   })
@@ -438,7 +430,7 @@ case class OptionParser(
           }
           
         case Some(option) =>
-          val argToPass = if (option.gobbleNextArgument) {
+          val argToPass: String = if (option.gobbleNextArgument) {
             i += 1;
             
             if (i >= args.length) {
