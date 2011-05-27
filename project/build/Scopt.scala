@@ -1,6 +1,6 @@
 import sbt._
 
-class ScoptProject(info: ProjectInfo) extends DefaultProject(info) {
+class ScoptProject(info: ProjectInfo) extends DefaultProject(info) with posterous.Publish {
   val scalaToolsNexusSnapshots = "Scala Tools Nexus Snapshots" at "http://nexus.scala-tools.org/content/repositories/snapshots/"
   val scalaToolsNexusReleases  = "Scala Tools Nexus Releases" at "http://nexus.scala-tools.org/content/repositories/releases/"
   
