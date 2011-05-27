@@ -53,8 +53,9 @@ The above generates the following usage text:
 scala-tools.org Nexus
 ---------------------
 
-    val scopt = "com.github.scopt" %% "scopt" % "1.0.0-SNAPSHOT"
+    val scopt = "com.github.scopt" %% "scopt" % "1.0.0"
     val scalaToolsNexusSnapshots = "Scala Tools Nexus Snapshots" at "http://nexus.scala-tools.org/content/repositories/snapshots/"
+    val scalaToolsNexusReleases  = "Scala Tools Nexus Releases" at "http://nexus.scala-tools.org/content/repositories/releases/"
 
 Building
 --------
