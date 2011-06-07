@@ -15,7 +15,9 @@ private case class OptionDefinition(
         description: String,
         action: String => Unit,
         gobbleNextArgument: Boolean,
-        keyValueArgument: Boolean) {
+        keyValueArgument: Boolean,
+        minOccurs: Int,
+        maxOccurs: Int) {
   def shortDescription = "option " + longopt
 }
 
@@ -23,15 +25,16 @@ private case class OptionDefinition(
 private class SeparatorDefinition(
         description: String
         ) extends OptionDefinition(false, null, null, null, null,
-          description, {a: String => {}}, false, false)
+          description, {a: String => {}}, false, false, 1, 1)
 
 private class Argument(
         name: String,
         description: String,
-        val allowMultiple: Boolean,
+        minOccurs: Int,
+        maxOccurs: Int,
         action: String => Unit
         ) extends OptionDefinition(false, null, name, null, name, 
-          description, action, false, false) {
+          description, action, false, false, minOccurs, maxOccurs) {
 
   override def shortDescription = "argument " + name
 }
@@ -43,7 +46,7 @@ private class ArgOptionDefinition(
         description: String,
         action: String => Unit
         ) extends OptionDefinition(true, shortopt, longopt, null, valueName,
-          description, action, true, false)
+          description, action, true, false, 0, OptionParser.UNBOUNDED)
 
 private class IntArgOptionDefinition(
         shortopt: Option[String],
@@ -52,7 +55,7 @@ private class IntArgOptionDefinition(
         description: String,
         action: Int => Unit
         ) extends OptionDefinition(true, shortopt, longopt, null, valueName,
-          description, {a: String => action(a.toInt)}, true, false)
+          description, {a: String => action(a.toInt)}, true, false, 0, OptionParser.UNBOUNDED)
 
 private class DoubleArgOptionDefinition(
         shortopt: Option[String],
@@ -61,7 +64,7 @@ private class DoubleArgOptionDefinition(
         description: String,
         action: Double => Unit
         ) extends OptionDefinition(true, shortopt, longopt, null, valueName,
-          description, {a: String => action(a.toDouble)}, true, false)
+          description, {a: String => action(a.toDouble)}, true, false, 0, OptionParser.UNBOUNDED)
 
 private class BooleanArgOptionDefinition(
         shortopt: Option[String],
@@ -82,7 +85,7 @@ private class BooleanArgOptionDefinition(
         throw new IllegalArgumentException("Expected a string I can interpret as a boolean")
     }
     action(boolValue)},
-    true, false)
+    true, false, 0, OptionParser.UNBOUNDED)
     
 private object KeyValueParser {
   def split(s: String): (String, String) = s.indexOf('=') match {
@@ -100,7 +103,7 @@ private class KeyValueArgOptionDefinition(
         action: (String, String) => Unit
         ) extends OptionDefinition(true, shortopt, longopt, keyName, valueName, 
           description, { a: String => action(KeyValueParser.split(a)._1, KeyValueParser.split(a)._2) },
-          false, true)
+          false, true, 0, OptionParser.UNBOUNDED)
 
 private class KeyIntValueArgOptionDefinition(
         shortopt: Option[String],
@@ -111,7 +114,7 @@ private class KeyIntValueArgOptionDefinition(
         action: (String, Int) => Unit
         ) extends OptionDefinition(true, shortopt, longopt, keyName, valueName, 
           description, { a: String => action(KeyValueParser.split(a)._1, KeyValueParser.split(a)._2.toInt) },
-          false, true)
+          false, true, 0, OptionParser.UNBOUNDED)
 
 private class KeyDoubleValueArgOptionDefinition(
         shortopt: Option[String],
@@ -122,7 +125,7 @@ private class KeyDoubleValueArgOptionDefinition(
         action: (String, Double) => Unit
         ) extends OptionDefinition(true, shortopt, longopt, keyName, valueName, 
           description, { a: String => action(KeyValueParser.split(a)._1, KeyValueParser.split(a)._2.toDouble) },
-          false, true)
+          false, true, 0, OptionParser.UNBOUNDED)
 
 private class KeyBooleanValueArgOptionDefinition(
         shortopt: Option[String],
@@ -147,7 +150,7 @@ private class KeyBooleanValueArgOptionDefinition(
             }
             action(key, boolValue)
           },
-          false, true)
+          false, true, 0, OptionParser.UNBOUNDED)
       
 private class FlagOptionDefinition(
         shortopt: Option[String],
@@ -155,7 +158,7 @@ private class FlagOptionDefinition(
         description: String,
         action: => Unit
         ) extends OptionDefinition(true, shortopt, longopt, null, null,
-          description, {a: String => action}, false, false)
+          description, {a: String => action}, false, false, 0, OptionParser.UNBOUNDED)
 
 /** OptionParser is instantiated within your object,
  * set up by an (ordered) sequence of invocations of 
@@ -200,16 +203,13 @@ case class OptionParser(
   private val NLNL = NL + NL
   private val defaultKeyName = "<key>"
   private val defaultValueName = "<value>"
-  private var argList: Option[Argument] = None
+  private var argList: Option[Argument] = None 
   
   // -------- Defining options ---------------
   private def add(option: OptionDefinition) {
     option match {
-      case a: Argument =>
-        if (a.allowMultiple)
-          argList = Some(a)
-        else
-          arguments += a
+      case a: Argument if a.maxOccurs > 1 => argList = Some(a)
+      case a: Argument => arguments += a
       case _ => options += option
     }
   }
@@ -384,16 +384,32 @@ case class OptionParser(
    * @param action callback function
    */  
   def arg(name: String, description: String, action: String => Unit) =
-    add(new Argument(name, description, false, action))
-  
+    add(new Argument(name, description, 1, 1, action))
+
+  /** adds an optional argument invoked by an option without `-` or `--`.
+   * @param name name in the usage text
+   * @param description description in the usage text
+   * @param action callback function
+   */  
+  def argOpt(name: String, description: String, action: String => Unit) =
+    add(new Argument(name, description, 0, 1, action))
+      
   /** adds a list of arguments invoked by options without `-` or `--`.
    * @param name name in the usage text
    * @param description description in the usage text
    * @param action callback function
    */
   def arglist(name: String, description: String, action: String => Unit) =
-    add(new Argument(name, description, true, action))
+    add(new Argument(name, description, 1, OptionParser.UNBOUNDED, action))
 
+  /** adds an optional list of arguments invoked by options without `-` or `--`.
+   * @param name name in the usage text
+   * @param description description in the usage text
+   * @param action callback function
+   */
+  def arglistOpt(name: String, description: String, action: String => Unit) =
+    add(new Argument(name, description, 0, OptionParser.UNBOUNDED, action))
+    
   // -------- Getting usage information ---------------
   private def descriptions: Seq[String] = options.map(opt => opt match {
     //case x: Argument => x.longopt + " :" + NLTB + opt.description
@@ -450,7 +466,7 @@ case class OptionParser(
    */
   def parse(args: Seq[String]): Boolean = {
     var i = 0
-    val requiredArgs = arguments.clone
+    val requiredArgs = new ListBuffer[Argument] ++ (arguments filter {_.minOccurs > 0})
     var answer = true
     var argListCount = 0
     var indexOutOfBounds = false
@@ -524,7 +540,10 @@ case class OptionParser(
     }
     
     if (!requiredArgs.isEmpty ||
-        (argListCount == 0 && argList.isDefined)) {
+        (argListCount == 0 && (argList match {
+          case Some(a: Argument) => a.minOccurs > 0
+          case _ => false
+        }))) {
       System.err.println("Error: missing arguments: " + argumentNames.mkString(", "))
       answer = false      
     }
@@ -532,4 +551,8 @@ case class OptionParser(
       showUsage
     answer
   }
+}
+
+object OptionParser {
+  private[scopt] val UNBOUNDED = 1024  
 }

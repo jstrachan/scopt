@@ -8,7 +8,7 @@ class ScoptProject(info: ProjectInfo) extends DefaultProject(info) with posterou
     case "2.7.7" => "org.scalatest" % "scalatest" % "1.1" % "test"
     case "2.8.0" => "org.scalatest" % "scalatest" % "1.2" % "test"
     case "2.8.1" => "org.scalatest" % "scalatest" % "1.2" % "test"
-    case _ => "org.scalatest" %% "scalatest" % "1.4.1" % "test"
+    case _ => "org.scalatest" % "scalatest_2.9.0" % "1.4.1" % "test"
   }
   
   override def testAction = crossScalaVersionString match {
