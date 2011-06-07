@@ -53,7 +53,7 @@ The above generates the following usage text:
 scala-tools.org Nexus
 ---------------------
 
-    val scopt = "com.github.scopt" %% "scopt" % "1.0.0"
+    val scopt = "com.github.scopt" %% "scopt" % "1.1.0"
     val scalaToolsNexusSnapshots = "Scala Tools Nexus Snapshots" at "http://nexus.scala-tools.org/content/repositories/snapshots/"
     val scalaToolsNexusReleases  = "Scala Tools Nexus Releases" at "http://nexus.scala-tools.org/content/repositories/releases/"
 
@@ -71,11 +71,4 @@ Do whatever you like with it :), or use MIT License.
 Changes
 -------
 
-* added -x:key=value option 
-* updated usage text style
-* added maven and sbt builds
-* added ScalaTest test cases
-* added arguments which then are displayed in help
-* minor refactoring of names; opt and arg for options and args
-* updated sbt and maven to build against Scala 2.8.0 
-* added option that does not have short option
+See [notes](https://github.com/jstrachan/scopt/tree/master/notes).
