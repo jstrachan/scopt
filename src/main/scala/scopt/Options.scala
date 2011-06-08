@@ -466,7 +466,7 @@ case class OptionParser(
    */
   def parse(args: Seq[String]): Boolean = {
     var i = 0
-    val requiredArgs = new ListBuffer[Argument] ++ (arguments filter {_.minOccurs > 0})
+    val unseenArgs = arguments.clone
     var answer = true
     var argListCount = 0
     var indexOutOfBounds = false
@@ -496,14 +496,15 @@ case class OptionParser(
             if (!applyArgument(argList.get, arg)) {
               answer = false
             }            
-          } else if (requiredArgs.isEmpty) {
+          } else if (unseenArgs.isEmpty) {
             if (errorOnUnknownArgument) {
               System.err.println("Error: Unknown argument '" + arg + "'")
               answer = false              
             } else
               System.err.println("Warning: Unknown argument '" + arg + "'")
           } else {
-            val first = requiredArgs.remove(0)
+            val first = unseenArgs.remove(0)
+            
             if (!applyArgument(first, arg)) {
               answer = false
             }
@@ -539,7 +540,7 @@ case class OptionParser(
       i += 1
     }
     
-    if (!requiredArgs.isEmpty ||
+    if ((unseenArgs.toList exists { _.minOccurs > 0 }) ||
         (argListCount == 0 && (argList match {
           case Some(a: Argument) => a.minOccurs > 0
           case _ => false

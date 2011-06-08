@@ -72,13 +72,17 @@ class OptionsTest extends FunSuite {
   }
   
   val parser3 = new OptionParser("scopt") {
-    arglistOpt("<file>...", "some argument", {v: String => config.files = (v :: config.files).reverse })
+    argOpt("<file>...", "some argument", {v: String => config.files = (v :: config.files).reverse })
   }
   
-  test("valid optional argument list is parsed correctly") {
+  test("empty optional argument is parsed correctly") {
     validArguments(parser3, Config(files = List()))
   }  
   
+  test("valid optional argument is parsed correctly") {
+    validArguments(parser3, Config(files = List("foo")), "foo")
+  }
+    
   def validArguments(parser: OptionParser,
       expectedConfig: Config, args: String*) {
     config = new Config()
