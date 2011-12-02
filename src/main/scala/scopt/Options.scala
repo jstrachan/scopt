@@ -370,10 +370,10 @@ case class OptionParser(
     add(new KeyBooleanValueArgOptionDefinition(shortopt, longopt, keyName, valueName, description, action))
   
   def help(shortopt: String, longopt: String, description: String) =
-    add(new FlagOptionDefinition(Some(shortopt), longopt, description, {this.showUsage; exit}))
+    add(new FlagOptionDefinition(Some(shortopt), longopt, description, {this.showUsage; sys.exit}))
 
   def help(shortopt: Option[String], longopt: String, description: String) =
-    add(new FlagOptionDefinition(shortopt, longopt, description, {this.showUsage; exit}))
+    add(new FlagOptionDefinition(shortopt, longopt, description, {this.showUsage; sys.exit}))
   
   def separator(description: String) =
     add(new SeparatorDefinition(description))
