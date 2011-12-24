@@ -8,6 +8,11 @@ mentioned [in this thread](http://old.nabble.com/-scala--CLI-library--ts19391923
 [this thread](http://old.nabble.com/Parsing-command-lines-argument-in-a-%22scalaesque%22-way-tp26592006p26595257.html)
 which is available [as a gist](http://gist.github.com/246481) or [here](http://harnly.net/tmp/OptionsParser.scala).
 
+scala-tools.org Nexus
+---------------------
+
+    libraryDependencies += "com.github.scopt" %% "scopt" % "1.1.3"
+    
 If you prefer the Annotation approach
 -------------------------------------
 
@@ -49,13 +54,6 @@ The above generates the following usage text:
             load library <libname>
       <singlefile>
             <singlefile> is an argument
-
-scala-tools.org Nexus
----------------------
-
-    val scopt = "com.github.scopt" %% "scopt" % "1.1.0"
-    val scalaToolsNexusSnapshots = "Scala Tools Nexus Snapshots" at "http://nexus.scala-tools.org/content/repositories/snapshots/"
-    val scalaToolsNexusReleases  = "Scala Tools Nexus Releases" at "http://nexus.scala-tools.org/content/repositories/releases/"
 
 Building
 --------
