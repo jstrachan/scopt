@@ -4,6 +4,10 @@ version := "1.1.3"
 
 organization := "com.github.scopt"
 
+licenses := Seq("MIT License" -> url("http://www.opensource.org/licenses/mit-license.php"))
+
+description := """a command line options parsing library"""
+
 scalaVersion := "2.9.1"
 
 crossScalaVersions := Seq("2.9.1", "2.9.0-1", "2.8.1")
@@ -38,3 +42,8 @@ publishTo <<= (version) { version: String =>
 }
 
 credentials += Credentials(Path.userHome / ".ivy2" / ".credentials")
+
+
+seq(lsSettings :_*)
+
+LsKeys.tags in LsKeys.lsync := Seq("cli", "command-line", "parsing", "parser")
